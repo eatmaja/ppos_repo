@@ -1160,17 +1160,39 @@ class Sale extends Model
      * Retrieves all sales that are in a suspended state
      */
     public function get_all_suspended(?int $customer_id = null): array
-    {
-        if ($customer_id == NEW_ENTRY) {
-            $query = $this->db->query("SELECT sale_id, case when sale_type = '" . SALE_TYPE_QUOTE . "' THEN quote_number WHEN sale_type = '" . SALE_TYPE_WORK_ORDER . "' THEN work_order_number else sale_id end as doc_id, sale_id as suspended_sale_id, sale_status, sale_time, dinner_table_id, customer_id, employee_id, comment FROM "
-                . $this->db->prefixTable('sales') . ' where sale_status = ' . SUSPENDED);
+{
+    // Siapkan query dasar
+        $selectFields = "sale_id,
+            CASE
+                WHEN sale_type = '" . SALE_TYPE_QUOTE . "' THEN quote_number
+                WHEN sale_type = '" . SALE_TYPE_WORK_ORDER . "' THEN work_order_number
+                ELSE sale_id
+            END AS doc_id,
+            sale_id AS suspended_sale_id,
+            sale_status,
+            sale_time,
+            dinner_table_id,
+            customer_id,
+            employee_id,
+            comment";
+
+        $salesTable = $this->db->prefixTable('sales');
+
+        // Bangun query sesuai kondisi customer_id
+        if ($customer_id === null || !is_numeric($customer_id)) {
+        // Tidak kirim customer_id
+            $sql = "SELECT {$selectFields} FROM {$salesTable} WHERE sale_status = " . SUSPENDED;
+        } elseif ($customer_id == NEW_ENTRY) {
+        // NEW_ENTRY khusus, tidak pakai customer_id
+            $sql = "SELECT {$selectFields} FROM {$salesTable} WHERE sale_status = " . SUSPENDED;
         } else {
-            $query = $this->db->query("SELECT sale_id, case when sale_type = '" . SALE_TYPE_QUOTE . "' THEN quote_number WHEN sale_type = '" . SALE_TYPE_WORK_ORDER . "' THEN work_order_number else sale_id end as doc_id, sale_status, sale_time, dinner_table_id, customer_id, employee_id, comment FROM "
-                . $this->db->prefixTable('sales') . ' where sale_status = ' . SUSPENDED . ' AND customer_id = ' . $customer_id);
+        // customer_id valid dan diisi
+            $sql = "SELECT {$selectFields} FROM {$salesTable} WHERE sale_status = " . SUSPENDED . " AND customer_id = " . (int) $customer_id;
         }
 
+        $query = $this->db->query($sql);
         return $query->getResultArray() ?: [];
-    }
+        }
 
     /**
      * Gets the dinner table for the selected sale

@@ -1537,10 +1537,30 @@ class Sales extends Secure_Controller
      */
     public function getSuspended(): void
     {
+        $sale_model = model(Sale::class);
+        $dinner_table = model(Dinner_table::class);
+
+        $suspended_sales = $sale_model->get_all_suspended();
+
+        foreach ($suspended_sales as &$sale) {
+            $sale['dinner_table_name'] = !empty($sale['dinner_table_id']) 
+                ? $dinner_table->get_name($sale['dinner_table_id']) 
+                : '-';
+        }
+
+        $data = [
+            'suspended_sales' => $suspended_sales,
+            'config' => config('App') // atau config lainnya yang relevan
+        ];
+
+        echo view('sales/suspended', $data);
+
+    /*
         $data = [];
         $customer_id = $this->sale_lib->get_customer();
         $data['suspended_sales'] = $this->sale->get_all_suspended($customer_id);
-        echo view('sales/suspended', $data);
+        $data['dinner_table'] = $this->sale_lib->get_dinner_table(); // Tambahkan ini
+        echo view('sales/suspended', $data); */
     }
 
     /**

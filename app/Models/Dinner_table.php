@@ -79,12 +79,13 @@ class Dinner_table extends Model
     {
         if (empty($dinner_table_id)) {
             return '';
-        } else {    // TODO: No need for this else statement.  Just put it's contents outside of the else since the if has a return in it.
-            $builder = $this->db->table('dinner_tables');
-            $builder->where('dinner_table_id', $dinner_table_id);
-
-            return $builder->get()->getRow()->name;
         }
+
+        $builder = $this->db->table($this->table);
+        $builder->where($this->primaryKey, $dinner_table_id);
+        $row = $builder->get()->getRow();
+
+        return $row ? $row->name : '-';
     }
 
     /**

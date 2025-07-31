@@ -21,6 +21,11 @@ class App extends BaseConfig
      */
     public string $commit_sha1 = 'dev';
 
+    // Tambahkan di dalam class App
+    public bool $dinner_table_enable = true; // atau false jika fitur belum digunakan
+    public string $dateformat = 'd/m/Y H:i'; // atau sesuaikan ke 'Y-m-d H:i:s' dll
+
+
     /**
      * Logs are stored in writable/logs
      *
